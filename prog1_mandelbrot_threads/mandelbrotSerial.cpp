@@ -90,3 +90,67 @@ void mandelbrotSerial(
     }
 }
 
+void mandelbrotSerialAlter(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startCol, int totalCols,
+    int maxIterations,
+    int output[])
+{
+    float dx = (x1 - x0) / width;
+    float dy = (y1 - y0) / height;
+
+    int endCol = startCol + totalCols;
+
+    for (int i = startCol; i < endCol; i++) {
+        for (int j = 0; j < height; ++j) {
+            float x = x0 + i * dx;
+            float y = y0 + j * dy;
+
+            int index = (j * width + i);
+            output[index] = mandel(x, y, maxIterations);
+        }
+    }
+}
+
+void mandelbrotSerialStride(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startRow, int stride,
+    int maxIterations,
+    int output[])
+{
+    float dx = (x1 - x0) / width;
+    float dy = (y1 - y0) / height;
+
+    for (int j = startRow; j < height; j += stride) {
+        for (int i = 0; i < width; ++i) {
+            float x = x0 + i * dx;
+            float y = y0 + j * dy;
+
+            int index = (j * width + i);
+            output[index] = mandel(x, y, maxIterations);
+        }
+    }
+}
+
+void mandelbrotSerialAlterStride(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startCol, int stride,
+    int maxIterations,
+    int output[])
+{
+    float dx = (x1 - x0) / width;
+    float dy = (y1 - y0) / height;
+
+    for (int i = startCol; i < width; i += stride) {
+        for (int j = 0; j < height; ++j) {
+            float x = x0 + i * dx;
+            float y = y0 + j * dy;
+
+            int index = (j * width + i);
+            output[index] = mandel(x, y, maxIterations);
+        }
+    }
+}

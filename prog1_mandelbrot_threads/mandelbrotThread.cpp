@@ -3,6 +3,8 @@
 
 #include "CycleTimer.h"
 
+#define max(a,b) (((a)>(b))?(a):(b))
+
 typedef struct {
     float x0, x1;
     float y0, y1;
@@ -22,6 +24,27 @@ extern void mandelbrotSerial(
     int maxIterations,
     int output[]);
 
+extern void mandelbrotSerialAlter(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startCol, int numCols,
+    int maxIterations,
+    int output[]);
+
+extern void mandelbrotSerialStride(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startRow, int stride,
+    int maxIterations,
+    int output[]);
+
+extern void mandelbrotSerialAlterStride(
+    float x0, float y0, float x1, float y1,
+    int width, int height,
+    int startCol, int stride,
+    int maxIterations,
+    int output[]);
+
 
 //
 // workerThreadStart --
@@ -35,7 +58,52 @@ void workerThreadStart(WorkerArgs * const args) {
     // program that uses two threads, thread 0 could compute the top
     // half of the image and thread 1 could compute the bottom half.
 
-    printf("Hello world from thread %d\n", args->threadId);
+
+    double startTime = CycleTimer::currentSeconds();
+
+    /*
+    int numRows = args->height / args->numThreads;
+    int startRow = args->threadId * numRows;
+    int remainingRows = numRows;
+    if(args->threadId == args->numThreads - 1)
+        remainingRows = (int)(args->height) - startRow;
+    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+        args->width, args->height, startRow, remainingRows, args->maxIterations, args->output);
+    */
+
+    /*
+    for(int i = args->threadId; i < (int)(args->height); i += args->numThreads)
+        mandelbrotSerial(args->x0, args->y0, args->x1, args->y1,
+            args->width, args->height, i, 1, args->maxIterations, args->output);
+    */
+
+    /*
+    for(int i = args->threadId; i < (int)(args->width); i += args->numThreads)
+        mandelbrotSerialAlter(args->x0, args->y0, args->x1, args->y1,
+            args->width, args->height, i, 1, args->maxIterations, args->output);
+    */
+
+    /*
+    int numCols = args->width / args->numThreads;
+    int startCol = args->threadId * numCols;
+    int remainingCols = numCols;
+    if(args->threadId == args->numThreads - 1)
+        remainingCols = (int)(args->width) - startCol;
+    mandelbrotSerialAlter(args->x0, args->y0, args->x1, args->y1,
+        args->width, args->height, startCol, remainingCols, args->maxIterations, args->output);
+    */
+
+    /*
+    mandelbrotSerialStride(args->x0, args->y0, args->x1, args->y1,
+        args->width, args->height, args->threadId, args->numThreads, args->maxIterations, args->output);
+    */
+
+    mandelbrotSerialAlterStride(args->x0, args->y0, args->x1, args->y1,
+        args->width, args->height, args->threadId, args->numThreads, args->maxIterations, args->output);
+
+    double endTime = CycleTimer::currentSeconds();
+
+    printf("Hello world from thread %d, taking %.4f ms.\n", args->threadId, 1000 * (endTime - startTime));
 }
 
 //
