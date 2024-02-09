@@ -249,7 +249,54 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
   // Your solution should work for any value of
   // N and VECTOR_WIDTH, not just when VECTOR_WIDTH divides N
   //
-  
+
+  __cs149_vec_float x;
+  __cs149_vec_float result;
+  __cs149_vec_int exp;
+  __cs149_vec_int one = _cs149_vset_int(1);
+  __cs149_vec_int zero = _cs149_vset_int(0);
+  __cs149_vec_float max = _cs149_vset_float(9.999999f);
+  __cs149_mask maskAll, maskOverflows, maskNotOverflows, maskNotZero;
+
+  maskAll = _cs149_init_ones();
+
+  for(int i = 0; i < N; i += VECTOR_WIDTH) {
+    if(i + VECTOR_WIDTH > N) {
+      maskAll = _cs149_init_ones(N - i);
+    }
+
+    _cs149_vset_float(result, 1.f, maskAll);
+
+    _cs149_vload_float(x, values + i, maskAll);
+
+    _cs149_vload_int(exp, exponents + i, maskAll);
+
+    while(true) {
+      maskNotZero = _cs149_init_ones(0);
+
+      _cs149_vgt_int(maskNotZero, exp, zero, maskAll);
+
+      if(!_cs149_cntbits(maskNotZero))
+        break;
+
+      _cs149_vsub_int(exp, exp, one, maskNotZero);
+
+      maskNotOverflows = _cs149_init_ones(0);
+
+      maskOverflows = _cs149_init_ones(0);
+
+      _cs149_vlt_float(maskNotOverflows, result, max, maskNotZero);
+
+      _cs149_vmult_float(result, result, x, maskNotOverflows);
+
+      _cs149_vgt_float(maskOverflows, result, max, maskAll);
+
+      _cs149_vset_float(result, 9.999999f, maskOverflows);
+      
+    }
+
+    _cs149_vstore_float(output + i, result, maskAll);
+  }
 }
 
 // returns the sum of all elements in values
@@ -270,11 +317,24 @@ float arraySumVector(float* values, int N) {
   //
   // CS149 STUDENTS TODO: Implement your vectorized version of arraySumSerial here
   //
+
+  __cs149_vec_float x;
+  __cs149_vec_float sum = _cs149_vset_float(0.f);
+  __cs149_mask maskAll = _cs149_init_ones();
   
   for (int i=0; i<N; i+=VECTOR_WIDTH) {
-
+    _cs149_vload_float(x, values+i, maskAll);
+    _cs149_vadd_float(sum, sum, x, maskAll);
   }
 
-  return 0.0;
+  int width = VECTOR_WIDTH;
+  
+  while(width > 1) {
+    _cs149_hadd_float(sum, sum);
+    _cs149_interleave_float(sum, sum);
+    width /= 2;
+  }
+
+  return sum.value[0];
 }
 
