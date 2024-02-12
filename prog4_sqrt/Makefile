@@ -2,8 +2,7 @@ CXX=g++ -m64 -march=native
 CXXFLAGS=-I../common -Iobjs/ -O3 -Wall
 ISPC=ispc
 # note: requires AVX2 capable machine
-ISPCFLAGS=-O3 --target=avx2-i32x8 --arch=x86-64 --pic
-
+ISPCFLAGS=-O3 --target=neon-i32x8 --arch=aarch64 --pic
 
 APP_NAME=sqrt
 OBJDIR=objs
