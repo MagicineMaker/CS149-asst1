@@ -1,4 +1,4 @@
-CXX=g++ -m64 -march=native
+CXX=g++ -std=c++11 -m64 -march=native
 CXXFLAGS=-I../common -Iobjs/ -O3 -Wall
 
 

@@ -121,11 +121,11 @@ int main() {
     }
     clusterAssignments[m] = bestAssignment;
   }
-
-  // Uncomment to generate data file
-  // writeData("./data.dat", data, clusterCentroids, clusterAssignments, &M, &N,
-  //           &K, &epsilon);
   */
+  // Uncomment to generate data file
+  //writeData("./data.dat", data, clusterCentroids, clusterAssignments, &M, &N,
+  //        &K, &epsilon);
+  
 
   printf("Running K-means with: M=%d, N=%d, K=%d, epsilon=%f\n", M, N,
          K, epsilon);
