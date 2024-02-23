@@ -22,7 +22,7 @@ typedef struct {
   int M, N, K;
 
   // Used for assignment
-  double *minDist;
+  double *dist;
   int threadNum;
   int threadId;
 } WorkerArgs;
@@ -69,7 +69,7 @@ double dist(double *x, double *y, int nDim) {
 }
 
 void assignmentThreadStart(WorkerArgs *const args) {
-  for (int m = args->threadId; m < args->M; m += args->threadNum) {
+  /*for (int m = args->threadId; m < args->M; m += args->threadNum) {
     args->minDist[m] = 1e30;
     args->clusterAssignments[m] = -1;
   }
@@ -83,6 +83,27 @@ void assignmentThreadStart(WorkerArgs *const args) {
         args->clusterAssignments[m] = k;
       }
     }
+  }*/
+
+  for(int k = args->start; k < args->end; k++) {
+    for (int m = args->threadId; m < args->M; m += args->threadNum) {
+      double d = dist(&args->data[m * args->N],
+                      &args->clusterCentroids[k * args->N], args->N);
+      args->dist[k * args->M + m] = d;
+    }
+  }
+
+
+  for (int m = args->threadId; m < args->M; m += args->threadNum) {
+    double mini = 1e30;
+    int best = -1;
+    for(int k = args->start; k < args->end; k++) {
+      if(args->dist[k * args->M + m] < mini) {
+        mini = args->dist[k * args->M + m];
+        best = k;
+      }
+    }
+    args->clusterAssignments[m] = best;
   }
 }
 
@@ -112,7 +133,7 @@ void computeAssignments(WorkerArgs *const args) {
 
   free(minDist);*/
   
-  double *minDist = new double[args->M];
+  double *dist = new double[args->M * args->K];
 
   WorkerArgs args_i[numThreads];
   std::thread workers[numThreads];
@@ -127,7 +148,7 @@ void computeAssignments(WorkerArgs *const args) {
     args_i[i].K = args->K;
     args_i[i].start = args->start;
     args_i[i].end = args->end;
-    args_i[i].minDist = minDist;
+    args_i[i].dist = dist;
 
     args_i[i].threadNum = numThreads;
     args_i[i].threadId = i;
@@ -141,7 +162,7 @@ void computeAssignments(WorkerArgs *const args) {
     workers[i].join();
   }
 
-  free(minDist);
+  free(dist);
 }
 
 /**
